@@ -1,0 +1,9 @@
+{
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト"
+  },
+  "accessibility": {
+    "closeMenu": "メニューを閉じる"
+  }
+}

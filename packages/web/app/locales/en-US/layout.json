@@ -1,0 +1,9 @@
+{
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out"
+  },
+  "accessibility": {
+    "closeMenu": "Close menu"
+  }
+}
