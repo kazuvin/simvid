@@ -1,0 +1,41 @@
+{
+  "settings": "設定",
+  "displaySettings": "表示設定",
+  "scaleSettings": "スケール設定",
+  "chordSettings": "コード設定",
+  "rootKey": "基準キー",
+  "scaleType": "スケールタイプ",
+  "chordKey": "コードキー",
+  "chordType": "コードタイプ",
+  "showDegrees": "度数を表示",
+  "scaleTypes": {
+    "none": "スケールなし",
+    "major": "メジャー",
+    "minor": "マイナー",
+    "pentatonic-major": "ペンタトニック・メジャー",
+    "pentatonic-minor": "ペンタトニック・マイナー"
+  },
+  "chordTypes": {
+    "none": "コードなし",
+    "major": "メジャー",
+    "minor": "マイナー",
+    "maj7": "メジャー7th",
+    "maj9": "メジャー9th",
+    "maj11": "メジャー11th",
+    "maj13": "メジャー13th",
+    "min7": "マイナー7th",
+    "min9": "マイナー9th",
+    "min11": "マイナー11th",
+    "min13": "マイナー13th",
+    "dom7": "ドミナント7th",
+    "dom9": "ドミナント9th",
+    "dom11": "ドミナント11th",
+    "dom13": "ドミナント13th",
+    "sus2": "サス2",
+    "sus4": "サス4",
+    "dim": "ディミニッシュ",
+    "dim7": "ディミニッシュ7th",
+    "aug": "オーギュメント",
+    "half-dim7": "ハーフディミニッシュ7th"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "settings": "Settings",
+  "displaySettings": "Display Settings",
+  "scaleSettings": "Scale Settings",
+  "chordSettings": "Chord Settings",
+  "rootKey": "Root Key",
+  "scaleType": "Scale Type",
+  "chordKey": "Chord Key",
+  "chordType": "Chord Type",
+  "showDegrees": "Show Degrees",
+  "scaleTypes": {
+    "none": "No Scale",
+    "major": "Major",
+    "minor": "Minor",
+    "pentatonic-major": "Pentatonic Major",
+    "pentatonic-minor": "Pentatonic Minor"
+  },
+  "chordTypes": {
+    "none": "No Chord",
+    "major": "Major",
+    "minor": "Minor",
+    "maj7": "Major 7th",
+    "maj9": "Major 9th",
+    "maj11": "Major 11th",
+    "maj13": "Major 13th",
+    "min7": "Minor 7th",
+    "min9": "Minor 9th",
+    "min11": "Minor 11th",
+    "min13": "Minor 13th",
+    "dom7": "Dominant 7th",
+    "dom9": "Dominant 9th",
+    "dom11": "Dominant 11th",
+    "dom13": "Dominant 13th",
+    "sus2": "Sus2",
+    "sus4": "Sus4",
+    "dim": "Diminished",
+    "dim7": "Diminished 7th",
+    "aug": "Augmented",
+    "half-dim7": "Half Diminished 7th"
+  }
+}

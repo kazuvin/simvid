@@ -7,12 +7,10 @@ import { useState, useEffect, useCallback } from 'react';
 // Custom language detection function
 const detectLanguage = (): Language => {
   const browserLanguages = navigator.languages || [navigator.language];
-  
+
   // Check if any of the browser languages include Japanese
-  const hasJapanese = browserLanguages.some(lang => 
-    lang.toLowerCase().includes('ja')
-  );
-  
+  const hasJapanese = browserLanguages.some((lang) => lang.toLowerCase().includes('ja'));
+
   return hasJapanese ? 'ja-JP' : 'en-US';
 };
 

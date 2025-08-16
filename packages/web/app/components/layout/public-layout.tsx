@@ -15,8 +15,13 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header companyName={SITE_TITLE} showMobileMenu={showMobileMenu} onMobileMenuToggle={handleMobileMenuToggle} />
+    <div className="min-h-screen">
+      <Header
+        companyName={SITE_TITLE}
+        navigationItems={[]}
+        showMobileMenu={showMobileMenu}
+        onMobileMenuToggle={handleMobileMenuToggle}
+      />
       <main className="pt-16">{children || <Outlet />}</main>
     </div>
   );

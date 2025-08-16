@@ -1,1 +1,1 @@
-export const SITE_TITLE = 'ThemeForge';
+export const SITE_TITLE = 'Guitar Dojo';
