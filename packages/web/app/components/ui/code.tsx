@@ -48,7 +48,7 @@ export function Code({ children, language = 'css', className, showCopy = false, 
       <pre className="bg-muted overflow-x-auto rounded-md p-4 font-mono text-xs">
         {isEmpty ? (
           <div className="text-muted-foreground flex items-center justify-center py-4">
-{t('cssOutput.empty', { ns: 'oklch-generator' })}
+            {t('code.empty', { ns: 'ui' })}
           </div>
         ) : (
           <code 

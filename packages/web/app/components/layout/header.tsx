@@ -20,9 +20,6 @@ function Header({
   className,
   companyName = SITE_TITLE,
   navigationItems = [
-    { label: 'フレットボード', href: '/fretboard' },
-    { label: 'スケール', href: '/scales' },
-    { label: 'コード', href: '/chords' },
     { label: 'ホーム', href: '/' },
   ],
   showMobileMenu = false,

@@ -1,7 +1,6 @@
 {
   "auth": {
-    "login": "Log in",
-    "logout": "Log out"
+    "login": "Login"
   },
   "accessibility": {
     "closeMenu": "Close menu"

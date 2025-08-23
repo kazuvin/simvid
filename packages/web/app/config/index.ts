@@ -1,1 +1,1 @@
-export const SITE_TITLE = 'Guitar Dojo';
+export const SITE_TITLE = 'Simvid';

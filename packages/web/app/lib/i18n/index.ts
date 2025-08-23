@@ -115,3 +115,4 @@ export function useI18n(): UseI18nReturn {
 }
 
 export default i18n;
+
