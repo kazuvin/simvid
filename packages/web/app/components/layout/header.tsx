@@ -21,6 +21,7 @@ function Header({
   companyName = SITE_TITLE,
   navigationItems = [
     { label: 'ホーム', href: '/' },
+    { label: 'Video Editor', href: '/video' },
   ],
   showMobileMenu = false,
   onMobileMenuToggle,

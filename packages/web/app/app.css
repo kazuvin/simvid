@@ -7,7 +7,7 @@
     'Noto Color Emoji';
 
   /** Color */
-  --color-background: oklch(98.5% 0.01 50);
+  --color-background: oklch(98.5% 0.01 10);
   --color-foreground: oklch(10% 0.002 285);
   --color-card: oklch(100% 0 0);
   --color-card-foreground: oklch(10% 0.002 285);
@@ -109,11 +109,11 @@ body {
   .scrollbar-thin {
     scrollbar-color: oklch(30% 0.01 264) transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: oklch(30% 0.01 264 / 0.5);
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: oklch(40% 0.01 264 / 0.7);
   }
