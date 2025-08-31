@@ -120,8 +120,8 @@ function StepperTrigger({ className, children, ...props }: StepperTriggerProps) 
         'flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-2 text-sm font-medium transition-colors',
         'data-[state=completed]:bg-primary data-[state=completed]:border-primary data-[state=completed]:text-primary-foreground data-[state=completed]:hover:bg-primary/90',
         'data-[state=active]:bg-primary data-[state=active]:border-primary data-[state=active]:text-primary-foreground data-[state=active]:hover:bg-primary/90',
-        'data-[state=inactive]:bg-background data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-accent',
-        'data-[state=disabled]:bg-background data-[state=disabled]:border-border data-[state=disabled]:text-muted-foreground data-[state=disabled]:cursor-not-allowed data-[state=disabled]:opacity-50',
+        'data-[state=inactive]:bg-background data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:border-ring',
+        'data-[state=disabled]:bg-background data-[state=disabled]:border-border data-[state=disabled]:text-muted-foreground data-[state=disabled]:cursor-default',
         className,
       )}
       data-state={state}

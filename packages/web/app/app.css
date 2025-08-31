@@ -7,25 +7,25 @@
     'Noto Color Emoji';
 
   /** Color */
-  --color-background: oklch(98.5% 0.01 10);
+  --color-background: oklch(99.5% 0.005 285);
   --color-foreground: oklch(10% 0.002 285);
   --color-card: oklch(100% 0 0);
   --color-card-foreground: oklch(10% 0.002 285);
   --color-popover: oklch(100% 0 0);
   --color-popover-foreground: oklch(10% 0.002 285);
   --color-primary: oklch(55% 0.224 280);
-  --color-primary-foreground: oklch(98% 0.013 280);
+  --color-primary-foreground: oklch(98% 0.013 285);
   --color-secondary: oklch(96.1% 0.014 280);
   --color-secondary-foreground: oklch(10% 0.002 285);
   --color-muted: oklch(96.1% 0.014 280);
-  --color-muted-foreground: oklch(65.4% 0.014 280);
+  --color-muted-foreground: oklch(65.4% 0.014 285);
   --color-accent: oklch(96.1% 0.014 264);
   --color-accent-foreground: oklch(10% 0.002 285);
   --color-destructive: oklch(55% 0.206 27);
-  --color-destructive-foreground: oklch(98% 0.013 264);
-  --color-border: oklch(94.5% 0.01 50);
-  --color-input: oklch(91.4% 0.011 264);
-  --color-ring: oklch(71.4% 0.011 264);
+  --color-destructive-foreground: oklch(98% 0.013 285);
+  --color-border: oklch(94.5% 0.01 285);
+  --color-input: oklch(91.4% 0.011 285);
+  --color-ring: oklch(71.4% 0.011 285);
   --color-chart-1: oklch(67.5% 0.15 34);
   --color-chart-2: oklch(55.7% 0.097 194);
   --color-chart-3: oklch(36.2% 0.033 258);

@@ -1,5 +1,5 @@
-export default function Create() {
-  const message = 'Create';
+import { CreateVideoFlow } from '~/components/create';
 
-  return <div>{message}</div>;
+export default function Create() {
+  return <CreateVideoFlow />;
 }
