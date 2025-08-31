@@ -8,3 +8,4 @@ export * from './textarea';
 export * from './tabs';
 export * from './select';
 export * from './slider';
+export * from './stepper';

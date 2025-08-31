@@ -46,7 +46,7 @@ export function useVideoPlayer(project: VideoProject) {
 
   const loadMediaElement = useCallback((item: MediaItem): Promise<HTMLImageElement | HTMLVideoElement> => {
     return new Promise((resolve, reject) => {
-      let element = mediaElementsRef.current.get(item.id);
+      const element = mediaElementsRef.current.get(item.id);
       
       if (element) {
         resolve(element);
