@@ -6,14 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '~/components/ui/dialog';
 import { RequiredChip } from '~/components/shared';
-import {
-  ScriptFormSchema,
-  type ScriptFormData,
-  PersonaFormSchema,
-  type PersonaFormData,
-  VIDEO_TYPES,
-  DURATIONS,
-} from '../schemas';
+import { ScriptFormSchema, type ScriptFormData, PersonaFormSchema, type PersonaFormData } from '../schemas';
 import { useCreateVideoContext } from '../context';
 
 // 動画の長さオプション表示用
@@ -112,7 +105,7 @@ function PersonaManager({
   const handleSavePersona = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     personaForm.handleSubmit((data: PersonaFormData) => {
       const newPersona = {
         id: editingPersona?.id || `persona-${Date.now()}`,
@@ -276,8 +269,8 @@ function PersonaManager({
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 キャンセル
               </Button>
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={() => {
                   const form = document.getElementById('persona-form') as HTMLFormElement;
                   if (form) {
@@ -373,7 +366,7 @@ export function ScriptStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-semibold">台本作成</h3>
+        <h3 className="text-xl font-semibold">動画の企画</h3>
         <p className="text-muted-foreground">動画の台本やシナリオを作成しましょう</p>
       </div>
 
@@ -411,7 +404,7 @@ export function ScriptStep() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="動画の長さを選択">
-                            {field.value ? getDurationLabel(field.value) : "動画の長さを選択"}
+                            {field.value ? getDurationLabel(field.value) : '動画の長さを選択'}
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
@@ -419,31 +412,35 @@ export function ScriptStep() {
                         <SelectItem value="sns_short">
                           <div className="flex flex-col items-start">
                             <span className="font-medium">SNS投稿用 (15-60秒)</span>
-                            <span className="text-xs text-muted-foreground">TikTok、Instagram Reels、YouTube Shorts</span>
+                            <span className="text-muted-foreground text-xs">
+                              TikTok、Instagram Reels、YouTube Shorts
+                            </span>
                           </div>
                         </SelectItem>
                         <SelectItem value="product_intro">
                           <div className="flex flex-col items-start">
                             <span className="font-medium">商品・サービス紹介 (1-3分)</span>
-                            <span className="text-xs text-muted-foreground">商品説明、会社概要、サービス紹介</span>
+                            <span className="text-muted-foreground text-xs">商品説明、会社概要、サービス紹介</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="tutorial">
                           <div className="flex flex-col items-start">
                             <span className="font-medium">チュートリアル・ハウツー (3-8分)</span>
-                            <span className="text-xs text-muted-foreground">操作方法、手順説明、レシピ</span>
+                            <span className="text-muted-foreground text-xs">操作方法、手順説明、レシピ</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="detailed_explanation">
                           <div className="flex flex-col items-start">
                             <span className="font-medium">詳細解説・講義 (8-15分)</span>
-                            <span className="text-xs text-muted-foreground">教育コンテンツ、深い解説</span>
+                            <span className="text-muted-foreground text-xs">教育コンテンツ、深い解説</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="long_content">
                           <div className="flex flex-col items-start">
                             <span className="font-medium">長編コンテンツ (15分以上)</span>
-                            <span className="text-xs text-muted-foreground">ウェビナー、インタビュー、ドキュメンタリー</span>
+                            <span className="text-muted-foreground text-xs">
+                              ウェビナー、インタビュー、ドキュメンタリー
+                            </span>
                           </div>
                         </SelectItem>
                         <SelectItem value="custom">カスタム</SelectItem>
@@ -580,7 +577,7 @@ export function ImageStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-semibold">画像生成</h3>
+        <h3 className="text-xl font-semibold">内容の編集</h3>
         <p className="text-muted-foreground">台本に基づいて動画に使用する画像を生成します</p>
       </div>
       <Card className="p-6">
@@ -594,7 +591,7 @@ export function AudioStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-semibold">音声生成</h3>
+        <h3 className="text-xl font-semibold">動画生成</h3>
         <p className="text-muted-foreground">ナレーションや効果音を生成します</p>
       </div>
       <Card className="p-6">
