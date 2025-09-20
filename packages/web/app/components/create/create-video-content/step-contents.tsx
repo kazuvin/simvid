@@ -1,6 +1,25 @@
-import { Card, Input, Textarea } from '~/components/ui';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Card, Input, Textarea, Checkbox } from '~/components/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
+import { scriptStepSchema, imageStepSchema, audioStepSchema, videoStepSchema, type ScriptStepData, type ImageStepData, type AudioStepData, type VideoStepData } from '../schemas';
 
 export function ScriptStep() {
+  const form = useForm<ScriptStepData>({
+    resolver: zodResolver(scriptStepSchema),
+    defaultValues: {
+      theme: '',
+      duration: 'short',
+      targetAudience: '',
+      content: '',
+    },
+  });
+
+  const onSubmit = (data: ScriptStepData) => {
+    console.log('Script step data:', data);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -9,37 +28,94 @@ export function ScriptStep() {
       </div>
 
       <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">動画のテーマ</label>
-            <Input type="text" placeholder="例: プログラミング入門" />
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="theme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>動画のテーマ</FormLabel>
+                  <FormControl>
+                    <Input placeholder="例: プログラミング入門" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">動画の長さ</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="short">短編 (1-3分)</option>
-              <option value="medium">中編 (3-10分)</option>
-              <option value="long">長編 (10分以上)</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>動画の長さ</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="動画の長さを選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="short">短編 (1-3分)</SelectItem>
+                      <SelectItem value="medium">中編 (3-10分)</SelectItem>
+                      <SelectItem value="long">長編 (10分以上)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">ターゲット層</label>
-            <Input type="text" placeholder="例: プログラミング初心者" />
-          </div>
+            <FormField
+              control={form.control}
+              name="targetAudience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ターゲット層</FormLabel>
+                  <FormControl>
+                    <Input placeholder="例: プログラミング初心者" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">詳細な内容</label>
-            <Textarea placeholder="動画で伝えたい内容を詳しく記載してください" rows={6} />
-          </div>
-        </div>
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>詳細な内容</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="動画で伝えたい内容を詳しく記載してください" rows={6} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </Card>
     </div>
   );
 }
 
 export function ImageStep() {
+  const form = useForm<ImageStepData>({
+    resolver: zodResolver(imageStepSchema),
+    defaultValues: {
+      style: 'realistic',
+      count: 5,
+      resolution: '1080p',
+      additionalInstructions: '',
+    },
+  });
+
+  const onSubmit = (data: ImageStepData) => {
+    console.log('Image step data:', data);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -48,52 +124,115 @@ export function ImageStep() {
       </div>
 
       <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">画像スタイル</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="realistic">リアリスティック</option>
-              <option value="anime">アニメ風</option>
-              <option value="illustration">イラスト</option>
-              <option value="abstract">抽象的</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">画像の枚数</label>
-            <input
-              type="number"
-              min="1"
-              max="20"
-              defaultValue="5"
-              className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="style"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>画像スタイル</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="画像スタイルを選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="realistic">リアリスティック</SelectItem>
+                      <SelectItem value="anime">アニメ風</SelectItem>
+                      <SelectItem value="illustration">イラスト</SelectItem>
+                      <SelectItem value="abstract">抽象的</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div>
-            <label className="text-sm font-medium">解像度</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="720p">HD (1280x720)</option>
-              <option value="1080p">Full HD (1920x1080)</option>
-              <option value="4k">4K (3840x2160)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">追加の指示</label>
-            <textarea
-              placeholder="画像生成に関する特別な要望があれば記載してください"
-              rows={4}
-              className="border-input bg-background mt-1 w-full resize-none rounded-md border px-3 py-2 text-sm"
+            <FormField
+              control={form.control}
+              name="count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>画像の枚数</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={20}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
+
+            <FormField
+              control={form.control}
+              name="resolution"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>解像度</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="解像度を選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="720p">HD (1280x720)</SelectItem>
+                      <SelectItem value="1080p">Full HD (1920x1080)</SelectItem>
+                      <SelectItem value="4k">4K (3840x2160)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="additionalInstructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>追加の指示</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="画像生成に関する特別な要望があれば記載してください"
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </Card>
     </div>
   );
 }
 
 export function AudioStep() {
+  const form = useForm<AudioStepData>({
+    resolver: zodResolver(audioStepSchema),
+    defaultValues: {
+      voiceType: 'female',
+      speed: 'normal',
+      tone: 'friendly',
+      includeBgm: false,
+      includeEffects: false,
+    },
+  });
+
+  const onSubmit = (data: AudioStepData) => {
+    console.log('Audio step data:', data);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -102,56 +241,130 @@ export function AudioStep() {
       </div>
 
       <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">ナレーション声質</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="male">男性の声</option>
-              <option value="female">女性の声</option>
-              <option value="child">子供の声</option>
-              <option value="senior">シニアの声</option>
-            </select>
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="voiceType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ナレーション声質</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="声質を選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="male">男性の声</SelectItem>
+                      <SelectItem value="female">女性の声</SelectItem>
+                      <SelectItem value="child">子供の声</SelectItem>
+                      <SelectItem value="senior">シニアの声</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">話すスピード</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="slow">ゆっくり</option>
-              <option value="normal">普通</option>
-              <option value="fast">早め</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="speed"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>話すスピード</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="スピードを選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="slow">ゆっくり</SelectItem>
+                      <SelectItem value="normal">普通</SelectItem>
+                      <SelectItem value="fast">早め</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">音声の調子</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="calm">落ち着いた</option>
-              <option value="energetic">エネルギッシュ</option>
-              <option value="friendly">フレンドリー</option>
-              <option value="professional">プロフェッショナル</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="tone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>音声の調子</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="調子を選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="calm">落ち着いた</SelectItem>
+                      <SelectItem value="energetic">エネルギッシュ</SelectItem>
+                      <SelectItem value="friendly">フレンドリー</SelectItem>
+                      <SelectItem value="professional">プロフェッショナル</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="flex items-center space-x-2">
-            <input type="checkbox" id="bgm" className="rounded" />
-            <label htmlFor="bgm" className="text-sm font-medium">
-              BGMを追加する
-            </label>
-          </div>
+            <FormField
+              control={form.control}
+              name="includeBgm"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>BGMを追加する</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
 
-          <div className="flex items-center space-x-2">
-            <input type="checkbox" id="effects" className="rounded" />
-            <label htmlFor="effects" className="text-sm font-medium">
-              効果音を追加する
-            </label>
-          </div>
-        </div>
+            <FormField
+              control={form.control}
+              name="includeEffects"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>効果音を追加する</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </Card>
     </div>
   );
 }
 
 export function VideoStep() {
+  const form = useForm<VideoStepData>({
+    resolver: zodResolver(videoStepSchema),
+    defaultValues: {
+      format: 'mp4',
+      quality: 'high',
+      frameRate: '30',
+    },
+  });
+
+  const onSubmit = (data: VideoStepData) => {
+    console.log('Video step data:', data);
+    console.log('動画を生成中...');
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -160,49 +373,96 @@ export function VideoStep() {
       </div>
 
       <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">出力形式</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="mp4">MP4</option>
-              <option value="mov">MOV</option>
-              <option value="avi">AVI</option>
-            </select>
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="format"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>出力形式</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="出力形式を選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="mp4">MP4</SelectItem>
+                      <SelectItem value="mov">MOV</SelectItem>
+                      <SelectItem value="avi">AVI</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">画質設定</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="standard">標準画質</option>
-              <option value="high">高画質</option>
-              <option value="ultra">最高画質</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="quality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>画質設定</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="画質を選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="standard">標準画質</SelectItem>
+                      <SelectItem value="high">高画質</SelectItem>
+                      <SelectItem value="ultra">最高画質</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div>
-            <label className="text-sm font-medium">フレームレート</label>
-            <select className="border-input bg-background mt-1 w-full rounded-md border px-3 py-2 text-sm">
-              <option value="24">24 FPS</option>
-              <option value="30">30 FPS</option>
-              <option value="60">60 FPS</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="frameRate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>フレームレート</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="フレームレートを選択" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="24">24 FPS</SelectItem>
+                      <SelectItem value="30">30 FPS</SelectItem>
+                      <SelectItem value="60">60 FPS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="border-border border-t pt-4">
-            <h4 className="mb-3 text-sm font-medium">生成設定の確認</h4>
-            <div className="text-muted-foreground space-y-2 text-sm">
-              <p>• 台本: 作成済み</p>
-              <p>• 画像: 生成済み</p>
-              <p>• 音声: 生成済み</p>
+            <div className="border-border border-t pt-4">
+              <h4 className="mb-3 text-sm font-medium">生成設定の確認</h4>
+              <div className="text-muted-foreground space-y-2 text-sm">
+                <p>• 台本: 作成済み</p>
+                <p>• 画像: 生成済み</p>
+                <p>• 音声: 生成済み</p>
+              </div>
             </div>
-          </div>
 
-          <div className="pt-4">
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-4 py-2 text-sm font-medium">
-              動画を生成する
-            </button>
-          </div>
-        </div>
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-4 py-2 text-sm font-medium"
+              >
+                動画を生成する
+              </button>
+            </div>
+          </form>
+        </Form>
       </Card>
     </div>
   );

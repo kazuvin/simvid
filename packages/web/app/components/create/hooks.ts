@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { CreateVideoStep } from '../types';
+import type { CreateVideoStep } from './types';
 
 export function useCreateVideoFlow(steps: CreateVideoStep[]) {
   const [currentStep, setCurrentStep] = React.useState(1);
