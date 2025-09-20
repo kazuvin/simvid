@@ -11,6 +11,16 @@ const VIDEO_TYPES = [
   'custom', // カスタム
 ] as const;
 
+// 動画の長さの選択肢
+const DURATIONS = [
+  'sns_short', // SNS投稿用 (15-60秒)
+  'product_intro', // 商品・サービス紹介 (1-3分)
+  'tutorial', // チュートリアル・ハウツー (3-8分)
+  'detailed_explanation', // 詳細解説・講義 (8-15分)
+  'long_content', // 長編コンテンツ (15分以上)
+  'custom', // カスタム
+] as const;
+
 
 // メインのスキーマ
 export const ScriptFormSchema = z
@@ -24,11 +34,18 @@ export const ScriptFormSchema = z
       .trim(),
 
     // 長さ（必須）
-    duration: z
+    duration: z.enum(DURATIONS, {
+      required_error: '動画の長さを選択してください',
+      invalid_type_error: '有効な長さを選択してください',
+    }),
+
+    // カスタム長さ（durationがcustomの場合のみ）
+    customDuration: z
       .number()
       .int('整数で入力してください')
       .min(10, '10秒以上で設定してください')
-      .max(1800, '30分以内で設定してください'),
+      .max(1800, '30分以内で設定してください')
+      .optional(),
 
     // 動画の種類（必須）
     videoType: z.enum(VIDEO_TYPES),
@@ -91,6 +108,19 @@ export const ScriptFormSchema = z
       .transform((val) => val?.trim() || undefined),
   })
   .refine(
+    // durationがcustomの場合はcustomDurationが必須
+    (data) => {
+      if (data.duration === 'custom') {
+        return data.customDuration !== undefined;
+      }
+      return true;
+    },
+    {
+      message: 'カスタム長さを指定してください',
+      path: ['customDuration'],
+    },
+  )
+  .refine(
     // videoTypeがcustomの場合はcustomVideoTypeが必須
     (data) => {
       if (data.videoType === 'custom') {
@@ -146,4 +176,4 @@ export const PersonaFormSchema = z.object({
 export type PersonaFormData = z.infer<typeof PersonaFormSchema>;
 
 // 配列をエクスポート
-export { VIDEO_TYPES };
+export { VIDEO_TYPES, DURATIONS };

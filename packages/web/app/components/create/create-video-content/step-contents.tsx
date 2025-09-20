@@ -12,8 +12,22 @@ import {
   PersonaFormSchema,
   type PersonaFormData,
   VIDEO_TYPES,
+  DURATIONS,
 } from '../schemas';
 import { useCreateVideoContext } from '../context';
+
+// 動画の長さオプション表示用
+const getDurationLabel = (value: string) => {
+  const labels: Record<string, string> = {
+    sns_short: 'SNS投稿用 (15-60秒)',
+    product_intro: '商品・サービス紹介 (1-3分)',
+    tutorial: 'チュートリアル・ハウツー (3-8分)',
+    detailed_explanation: '詳細解説・講義 (8-15分)',
+    long_content: '長編コンテンツ (15分以上)',
+    custom: 'カスタム',
+  };
+  return labels[value] || value;
+};
 
 // ペルソナプリセット
 const PERSONA_PRESETS = [
@@ -331,7 +345,7 @@ export function ScriptStep() {
     resolver: zodResolver(ScriptFormSchema),
     defaultValues: formData.script || {
       title: '',
-      duration: 60,
+      duration: 'product_intro',
       videoType: 'tutorial',
       targetPersonas: [],
       freeInput: '',
@@ -390,23 +404,78 @@ export function ScriptStep() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center gap-2">
-                      <FormLabel>動画の長さ（秒）</FormLabel>
+                      <FormLabel>動画の長さ</FormLabel>
                       <RequiredChip />
                     </div>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="60"
-                        min="10"
-                        max="1800"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="動画の長さを選択">
+                            {field.value ? getDurationLabel(field.value) : "動画の長さを選択"}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="sns_short">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">SNS投稿用 (15-60秒)</span>
+                            <span className="text-xs text-muted-foreground">TikTok、Instagram Reels、YouTube Shorts</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="product_intro">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">商品・サービス紹介 (1-3分)</span>
+                            <span className="text-xs text-muted-foreground">商品説明、会社概要、サービス紹介</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="tutorial">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">チュートリアル・ハウツー (3-8分)</span>
+                            <span className="text-xs text-muted-foreground">操作方法、手順説明、レシピ</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="detailed_explanation">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">詳細解説・講義 (8-15分)</span>
+                            <span className="text-xs text-muted-foreground">教育コンテンツ、深い解説</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="long_content">
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">長編コンテンツ (15分以上)</span>
+                            <span className="text-xs text-muted-foreground">ウェビナー、インタビュー、ドキュメンタリー</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="custom">カスタム</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {form.watch('duration') === 'custom' && (
+                <FormField
+                  control={form.control}
+                  name="customDuration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>カスタム長さ（秒）</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="60"
+                          min="10"
+                          max="1800"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
