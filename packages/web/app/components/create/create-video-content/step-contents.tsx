@@ -95,26 +95,31 @@ function PersonaManager({
     setIsDialogOpen(true);
   };
 
-  const handleSavePersona = personaForm.handleSubmit((data: PersonaFormData) => {
-    const newPersona = {
-      id: editingPersona?.id || `persona-${Date.now()}`,
-      name: data.name.trim(),
-      ageRange: data.ageRange || undefined,
-      gender: data.gender || undefined,
-      occupation: data.occupation || undefined,
-      characteristics: data.characteristics || undefined,
-    };
+  const handleSavePersona = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    personaForm.handleSubmit((data: PersonaFormData) => {
+      const newPersona = {
+        id: editingPersona?.id || `persona-${Date.now()}`,
+        name: data.name.trim(),
+        ageRange: data.ageRange || undefined,
+        gender: data.gender || undefined,
+        occupation: data.occupation || undefined,
+        characteristics: data.characteristics || undefined,
+      };
 
-    if (editingPersona) {
-      // 編集
-      onPersonasChange(personas.map((p) => (p.id === editingPersona.id ? newPersona : p)));
-    } else {
-      // 新規追加
-      onPersonasChange([...personas, newPersona]);
-    }
+      if (editingPersona) {
+        // 編集
+        onPersonasChange(personas.map((p) => (p.id === editingPersona.id ? newPersona : p)));
+      } else {
+        // 新規追加
+        onPersonasChange([...personas, newPersona]);
+      }
 
-    setIsDialogOpen(false);
-  });
+      setIsDialogOpen(false);
+    })(e);
+  };
 
   const handleDeletePersona = (id: string) => {
     onPersonasChange(personas.filter((p) => p.id !== id));
@@ -257,7 +262,15 @@ function PersonaManager({
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 キャンセル
               </Button>
-              <Button type="submit" form="persona-form">
+              <Button 
+                type="button" 
+                onClick={() => {
+                  const form = document.getElementById('persona-form') as HTMLFormElement;
+                  if (form) {
+                    form.requestSubmit();
+                  }
+                }}
+              >
                 {editingPersona ? '更新' : '追加'}
               </Button>
             </DialogFooter>
