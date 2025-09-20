@@ -1,5 +1,4 @@
 import { ScriptStep, ImageStep, AudioStep, VideoStep } from './step-contents';
-import { CreateVideoNavigation } from '../create-video-navigation';
 import { useCreateVideoContext } from '../context';
 
 export function CreateVideoContent() {
@@ -25,7 +24,6 @@ export function CreateVideoContent() {
       <div className="flex-1 overflow-auto p-8">
         {renderStepContent()}
       </div>
-      <CreateVideoNavigation />
     </div>
   );
 }
