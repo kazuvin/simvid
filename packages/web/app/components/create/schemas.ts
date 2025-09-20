@@ -21,7 +21,6 @@ const DURATIONS = [
   'custom', // カスタム
 ] as const;
 
-
 // メインのスキーマ
 export const ScriptFormSchema = z
   .object({
@@ -34,10 +33,7 @@ export const ScriptFormSchema = z
       .trim(),
 
     // 長さ（必須）
-    duration: z.enum(DURATIONS, {
-      required_error: '動画の長さを選択してください',
-      invalid_type_error: '有効な長さを選択してください',
-    }),
+    duration: z.enum(DURATIONS),
 
     // カスタム長さ（durationがcustomの場合のみ）
     customDuration: z
@@ -58,45 +54,32 @@ export const ScriptFormSchema = z
       .trim()
       .optional(),
 
-
     // ターゲット像の詳細（複数設定可能）
     targetPersonas: z
       .array(
         z.object({
           // ID（フロントエンド用）
           id: z.string(),
-          
+
           // ペルソナ名
           name: z
             .string()
             .min(1, 'ペルソナ名を入力してください')
             .max(100, 'ペルソナ名は100文字以内で入力してください')
             .trim(),
-          
+
           // 年齢層
-          ageRange: z
-            .string()
-            .max(50, '年齢層は50文字以内で入力してください')
-            .optional(),
-          
+          ageRange: z.string().max(50, '年齢層は50文字以内で入力してください').optional(),
+
           // 性別
-          gender: z
-            .string()
-            .max(20, '性別は20文字以内で入力してください')
-            .optional(),
-          
+          gender: z.string().max(20, '性別は20文字以内で入力してください').optional(),
+
           // 職業
-          occupation: z
-            .string()
-            .max(100, '職業は100文字以内で入力してください')
-            .optional(),
-          
+          occupation: z.string().max(100, '職業は100文字以内で入力してください').optional(),
+
           // 特徴・属性
-          characteristics: z
-            .string()
-            .max(300, '特徴は300文字以内で入力してください')
-            .optional(),
-        })
+          characteristics: z.string().max(300, '特徴は300文字以内で入力してください').optional(),
+        }),
       )
       .optional(),
 
@@ -132,8 +115,7 @@ export const ScriptFormSchema = z
       message: 'カスタム動画種類を入力してください',
       path: ['customVideoType'],
     },
-  )
-;
+  );
 
 // 型定義をエクスポート
 export type ScriptFormData = z.infer<typeof ScriptFormSchema>;
@@ -141,35 +123,19 @@ export type ScriptFormData = z.infer<typeof ScriptFormSchema>;
 // ペルソナフォーム用のスキーマ
 export const PersonaFormSchema = z.object({
   // ペルソナ名
-  name: z
-    .string()
-    .min(1, 'ペルソナ名を入力してください')
-    .max(100, 'ペルソナ名は100文字以内で入力してください')
-    .trim(),
-  
+  name: z.string().min(1, 'ペルソナ名を入力してください').max(100, 'ペルソナ名は100文字以内で入力してください').trim(),
+
   // 年齢層
-  ageRange: z
-    .string()
-    .max(50, '年齢層は50文字以内で入力してください')
-    .optional(),
-  
+  ageRange: z.string().max(50, '年齢層は50文字以内で入力してください').optional(),
+
   // 性別
-  gender: z
-    .string()
-    .max(20, '性別は20文字以内で入力してください')
-    .optional(),
-  
+  gender: z.string().max(20, '性別は20文字以内で入力してください').optional(),
+
   // 職業
-  occupation: z
-    .string()
-    .max(100, '職業は100文字以内で入力してください')
-    .optional(),
-  
+  occupation: z.string().max(100, '職業は100文字以内で入力してください').optional(),
+
   // 特徴・属性
-  characteristics: z
-    .string()
-    .max(300, '特徴は300文字以内で入力してください')
-    .optional(),
+  characteristics: z.string().max(300, '特徴は300文字以内で入力してください').optional(),
 });
 
 // ペルソナフォームの型定義
