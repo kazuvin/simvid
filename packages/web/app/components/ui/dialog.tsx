@@ -26,7 +26,7 @@ function DialogOverlay({ ref, className, ...props }: React.ComponentProps<typeof
 
 function DialogContent({ ref, className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   const { t } = useI18n();
-  
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -49,7 +49,7 @@ function DialogContent({ ref, className, children, ...props }: React.ComponentPr
 }
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)} {...props} />
+  <div className={cn('mb-2 flex flex-col space-y-1.5 text-center sm:text-left', className)} {...props} />
 );
 DialogHeader.displayName = 'DialogHeader';
 

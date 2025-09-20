@@ -1,47 +1,149 @@
 import { z } from 'zod';
 
-// Script Step Schema
-export const scriptStepSchema = z.object({
-  theme: z.string().min(1, '動画のテーマを入力してください'),
-  duration: z.enum(['short', 'medium', 'long']),
-  targetAudience: z.string().min(1, 'ターゲット層を入力してください'),
-  content: z.string().min(10, '詳細な内容を10文字以上で入力してください'),
+// 動画の種類の選択肢
+const VIDEO_TYPES = [
+  'tutorial', // チュートリアル
+  'explanation', // 解説
+  'introduction', // 紹介
+  'review', // レビュー
+  'presentation', // プレゼンテーション
+  'story', // ストーリー
+  'custom', // カスタム
+] as const;
+
+
+// メインのスキーマ
+export const ScriptFormSchema = z
+  .object({
+    // 動画のタイトル（必須）
+    title: z
+      .string()
+      .min(1, 'タイトルを入力してください')
+      .min(5, 'タイトルは5文字以上で入力してください')
+      .max(200, 'タイトルは200文字以内で入力してください')
+      .trim(),
+
+    // 長さ（必須）
+    duration: z
+      .number()
+      .int('整数で入力してください')
+      .min(10, '10秒以上で設定してください')
+      .max(1800, '30分以内で設定してください'),
+
+    // 動画の種類（必須）
+    videoType: z.enum(VIDEO_TYPES),
+
+    // カスタム動画種類（videoTypeがcustomの場合のみ）
+    customVideoType: z
+      .string()
+      .min(1, 'カスタム動画種類を入力してください')
+      .max(50, '50文字以内で入力してください')
+      .trim()
+      .optional(),
+
+
+    // ターゲット像の詳細（複数設定可能）
+    targetPersonas: z
+      .array(
+        z.object({
+          // ID（フロントエンド用）
+          id: z.string(),
+          
+          // ペルソナ名
+          name: z
+            .string()
+            .min(1, 'ペルソナ名を入力してください')
+            .max(100, 'ペルソナ名は100文字以内で入力してください')
+            .trim(),
+          
+          // 年齢層
+          ageRange: z
+            .string()
+            .max(50, '年齢層は50文字以内で入力してください')
+            .optional(),
+          
+          // 性別
+          gender: z
+            .string()
+            .max(20, '性別は20文字以内で入力してください')
+            .optional(),
+          
+          // 職業
+          occupation: z
+            .string()
+            .max(100, '職業は100文字以内で入力してください')
+            .optional(),
+          
+          // 特徴・属性
+          characteristics: z
+            .string()
+            .max(300, '特徴は300文字以内で入力してください')
+            .optional(),
+        })
+      )
+      .optional(),
+
+    // 自由入力欄（任意）
+    freeInput: z
+      .string()
+      .max(500, '自由入力は500文字以内で入力してください')
+      .optional()
+      .transform((val) => val?.trim() || undefined),
+  })
+  .refine(
+    // videoTypeがcustomの場合はcustomVideoTypeが必須
+    (data) => {
+      if (data.videoType === 'custom') {
+        return data.customVideoType !== undefined;
+      }
+      return true;
+    },
+    {
+      message: 'カスタム動画種類を入力してください',
+      path: ['customVideoType'],
+    },
+  )
+;
+
+// 型定義をエクスポート
+export type ScriptFormData = z.infer<typeof ScriptFormSchema>;
+
+// ペルソナフォーム用のスキーマ
+export const PersonaFormSchema = z.object({
+  // ペルソナ名
+  name: z
+    .string()
+    .min(1, 'ペルソナ名を入力してください')
+    .max(100, 'ペルソナ名は100文字以内で入力してください')
+    .trim(),
+  
+  // 年齢層
+  ageRange: z
+    .string()
+    .max(50, '年齢層は50文字以内で入力してください')
+    .optional(),
+  
+  // 性別
+  gender: z
+    .string()
+    .max(20, '性別は20文字以内で入力してください')
+    .optional(),
+  
+  // 職業
+  occupation: z
+    .string()
+    .max(100, '職業は100文字以内で入力してください')
+    .optional(),
+  
+  // 特徴・属性
+  characteristics: z
+    .string()
+    .max(300, '特徴は300文字以内で入力してください')
+    .optional(),
 });
 
-// Image Step Schema
-export const imageStepSchema = z.object({
-  style: z.enum(['realistic', 'anime', 'illustration', 'abstract']),
-  count: z.number().min(1, '最低1枚は必要です').max(20, '最大20枚まで設定可能です'),
-  resolution: z.enum(['720p', '1080p', '4k']),
-  additionalInstructions: z.string().optional(),
-});
+// ペルソナフォームの型定義
+export type PersonaFormData = z.infer<typeof PersonaFormSchema>;
 
-// Audio Step Schema
-export const audioStepSchema = z.object({
-  voiceType: z.enum(['male', 'female', 'child', 'senior']),
-  speed: z.enum(['slow', 'normal', 'fast']),
-  tone: z.enum(['calm', 'energetic', 'friendly', 'professional']),
-  includeBgm: z.boolean(),
-  includeEffects: z.boolean(),
-});
-
-// Video Step Schema
-export const videoStepSchema = z.object({
-  format: z.enum(['mp4', 'mov', 'avi']),
-  quality: z.enum(['standard', 'high', 'ultra']),
-  frameRate: z.enum(['24', '30', '60']),
-});
-
-// Combined form schema for the entire create video flow
-export const createVideoSchema = z.object({
-  script: scriptStepSchema,
-  image: imageStepSchema,
-  audio: audioStepSchema,
-  video: videoStepSchema,
-});
-
-export type ScriptStepData = z.infer<typeof scriptStepSchema>;
-export type ImageStepData = z.infer<typeof imageStepSchema>;
-export type AudioStepData = z.infer<typeof audioStepSchema>;
-export type VideoStepData = z.infer<typeof videoStepSchema>;
-export type CreateVideoData = z.infer<typeof createVideoSchema>;
+// 配列をエクスポート
+export { VIDEO_TYPES };
