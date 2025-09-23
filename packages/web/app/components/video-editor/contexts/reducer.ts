@@ -113,8 +113,10 @@ export function createVideoEditorActions(
       if (state.videoElement) {
         try {
           await state.videoElement.play();
+          dispatch({ type: 'SET_PLAYING', payload: true });
         } catch (error) {
           console.error('Play failed:', error);
+          dispatch({ type: 'SET_PLAYING', payload: false });
         }
       }
     },
@@ -122,6 +124,7 @@ export function createVideoEditorActions(
     pause: () => {
       if (state.videoElement) {
         state.videoElement.pause();
+        dispatch({ type: 'SET_PLAYING', payload: false });
       }
     },
 
@@ -135,14 +138,16 @@ export function createVideoEditorActions(
     setVolume: (volume: number) => {
       dispatch({ type: 'SET_VOLUME', payload: volume });
       if (state.videoElement) {
-        state.videoElement.volume = state.volume;
+        const clampedVolume = Math.max(0, Math.min(1, volume));
+        state.videoElement.volume = clampedVolume;
       }
     },
 
     setPlaybackRate: (rate: number) => {
       dispatch({ type: 'SET_PLAYBACK_RATE', payload: rate });
       if (state.videoElement) {
-        state.videoElement.playbackRate = state.playbackRate;
+        const clampedRate = Math.max(0.25, Math.min(4, rate));
+        state.videoElement.playbackRate = clampedRate;
       }
     },
 
