@@ -74,7 +74,6 @@ export function createVideoEditorActions(
           const currentState = getState();
           // srcがあり、かつ再生していない時のみ同期
           if (!currentState.isPlaying && video.src && video.readyState >= 1) {
-            console.log('Video timeupdate sync:', video.currentTime);
             dispatch({ type: 'SET_CURRENT_TIME', payload: video.currentTime });
           }
         };
@@ -145,7 +144,7 @@ export function createVideoEditorActions(
             return;
           }
 
-          const elapsed = (Date.now() - startTime) * currentState.playbackRate / 1000;
+          const elapsed = ((Date.now() - startTime) * currentState.playbackRate) / 1000;
           const newTime = initialCurrentTime + elapsed;
 
           if (newTime >= currentState.duration) {
@@ -272,11 +271,6 @@ export function videoEditorReducer(state: VideoEditorState, action: VideoEditorA
       return { ...state, isPlaying: action.payload };
 
     case 'SET_CURRENT_TIME':
-      console.log('SET_CURRENT_TIME called:', {
-        from: state.currentTime,
-        to: action.payload,
-        stack: new Error().stack?.split('\n')[1]
-      });
       return { ...state, currentTime: action.payload };
 
     case 'SET_DURATION':
