@@ -8,9 +8,15 @@ interface VideoEditorProviderProps {
 
 export function VideoEditorProvider({ children }: VideoEditorProviderProps) {
   const [state, dispatch] = useReducer(videoEditorReducer, initialVideoEditorState);
+  const stateRef = useRef(state);
 
-  // Actions を安定化するために useMemo を使用
-  const actions = useMemo(() => createVideoEditorActions(state, dispatch), [state, dispatch]);
+  // 最新の state を ref に保持
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  // Actions を安定化するために dispatch のみに依存
+  const actions = useMemo(() => createVideoEditorActions(() => stateRef.current, dispatch), [dispatch]);
 
   // video 要素が変更された時のクリーンアップ
   useEffect(() => {

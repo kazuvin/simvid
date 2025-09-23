@@ -25,6 +25,7 @@ export function VideoEditorCanvas({
       if (canvasRef.current) {
         actions.setCanvas(canvasRef.current);
       }
+      // Video要素は常に設定（イベントリスナーはsrcがある時のみ有効）
       if (videoRef.current) {
         actions.setVideoElement(videoRef.current);
       }
@@ -74,12 +75,11 @@ export function VideoEditorCanvas({
     ctx.restore();
   }, []);
 
-  // アニメーションフレームの管理と描画
+  // 描画とアニメーション管理
   useEffect(() => {
     const render = () => {
       const canvas = canvasRef.current;
-      const video = videoRef.current;
-      if (!canvas || !video) return;
+      if (!canvas) return;
 
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -87,32 +87,57 @@ export function VideoEditorCanvas({
       // Canvas をクリア
       ctx.clearRect(0, 0, width, height);
 
-      // 動画が再生可能な状態の場合、描画
-      if (video.readyState >= 2) {
-        // 動画を描画
+      // 背景を描画（動画がない場合はグラデーション背景）
+      const video = videoRef.current;
+      if (video && video.readyState >= 2 && video.src) {
+        // 動画がある場合は動画を描画
         ctx.drawImage(video, 0, 0, width, height);
+      } else {
+        // 動画がない場合はデフォルト背景を描画
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(1, '#16213e');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
 
-        // 現在時刻に基づいてトラックを描画
-        const currentTime = state.currentTime;
-
-        state.tracks.forEach(track => {
-          if (!track.enabled || currentTime < track.startTime || currentTime > track.endTime) {
-            return;
-          }
-
-          switch (track.type) {
-            case 'text':
-              renderText(ctx, track, width, height);
-              break;
-            case 'video':
-              // 追加の動画レイヤー（将来の実装用）
-              break;
-            case 'audio':
-              // オーディオは Canvas に描画しない
-              break;
-          }
-        });
+        // グリッドパターンを追加（オプション）
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        for (let x = 0; x <= width; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= height; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
       }
+
+      // 現在時刻に基づいてトラックを描画
+      const currentTime = state.currentTime;
+
+      state.tracks.forEach(track => {
+        if (!track.enabled || currentTime < track.startTime || currentTime > track.endTime) {
+          return;
+        }
+
+        switch (track.type) {
+          case 'text':
+            renderText(ctx, track, width, height);
+            break;
+          case 'video':
+            // 追加の動画レイヤー（将来の実装用）
+            break;
+          case 'audio':
+            // オーディオは Canvas に描画しない
+            break;
+        }
+      });
     };
 
     const animate = () => {

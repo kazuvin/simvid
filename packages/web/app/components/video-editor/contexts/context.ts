@@ -16,6 +16,7 @@ export interface VideoEditorState {
   };
   selectedTracks: string[];
   tracks: VideoTrack[];
+  timerId: number | null;
 }
 
 export interface VideoTrack {

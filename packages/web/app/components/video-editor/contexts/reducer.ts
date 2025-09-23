@@ -15,23 +15,25 @@ export type VideoEditorAction =
   | { type: 'UPDATE_TRACK'; payload: { id: string; updates: Partial<VideoTrack> } }
   | { type: 'SELECT_TRACK'; payload: string }
   | { type: 'DESELECT_TRACK'; payload: string }
-  | { type: 'CLEAR_SELECTION' };
+  | { type: 'CLEAR_SELECTION' }
+  | { type: 'SET_TIMER_ID'; payload: number | null };
 
 export const initialVideoEditorState: VideoEditorState = {
   canvas: null,
   videoElement: null,
   isPlaying: false,
   currentTime: 0,
-  duration: 0,
+  duration: 10, // デフォルトで10秒
   volume: 1,
   playbackRate: 1,
   timeline: {
     start: 0,
-    end: 0,
+    end: 10,
     zoom: 1,
   },
   selectedTracks: [],
   tracks: [],
+  timerId: null,
 };
 
 export interface VideoEditorActions {
@@ -42,6 +44,7 @@ export interface VideoEditorActions {
   seekTo: (time: number) => void;
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
+  setDuration: (duration: number) => void;
   setTimelineRange: (start: number, end: number) => void;
   setTimelineZoom: (zoom: number) => void;
   addTrack: (track: VideoTrack) => void;
@@ -53,7 +56,7 @@ export interface VideoEditorActions {
 }
 
 export function createVideoEditorActions(
-  state: VideoEditorState,
+  getState: () => VideoEditorState,
   dispatch: (action: VideoEditorAction) => void,
 ): VideoEditorActions {
   return {
@@ -67,19 +70,27 @@ export function createVideoEditorActions(
       if (video) {
         // ビジネスロジック: video要素のイベントリスナー設定
         const handleTimeUpdate = () => {
-          dispatch({ type: 'SET_CURRENT_TIME', payload: video.currentTime });
+          // タイマーベースの再生中は video の timeupdate を完全に無視
+          const currentState = getState();
+          // srcがあり、かつ再生していない時のみ同期
+          if (!currentState.isPlaying && video.src && video.readyState >= 1) {
+            console.log('Video timeupdate sync:', video.currentTime);
+            dispatch({ type: 'SET_CURRENT_TIME', payload: video.currentTime });
+          }
         };
 
         const handleDurationChange = () => {
-          dispatch({ type: 'SET_DURATION', payload: video.duration });
+          if (video.duration && !isNaN(video.duration)) {
+            dispatch({ type: 'SET_DURATION', payload: video.duration });
+          }
         };
 
         const handlePlay = () => {
-          dispatch({ type: 'SET_PLAYING', payload: true });
+          // video要素からの再生イベントは無視（タイマーベースを優先）
         };
 
         const handlePause = () => {
-          dispatch({ type: 'SET_PLAYING', payload: false });
+          // video要素からの一時停止イベントは無視（タイマーベースを優先）
         };
 
         const handleVolumeChange = () => {
@@ -110,33 +121,92 @@ export function createVideoEditorActions(
     },
 
     play: async () => {
+      const state = getState();
+
+      // タイマーベースの再生システム
+      if (!state.isPlaying) {
+        // 既存のタイマーがあれば停止
+        if (state.timerId) {
+          cancelAnimationFrame(state.timerId);
+          dispatch({ type: 'SET_TIMER_ID', payload: null });
+        }
+
+        dispatch({ type: 'SET_PLAYING', payload: true });
+
+        // 独立したタイマーで時間を更新
+        const startTime = Date.now();
+        const initialCurrentTime = state.currentTime;
+
+        const updateTime = () => {
+          const currentState = getState();
+
+          // 再生が停止された場合はタイマーを停止
+          if (!currentState.isPlaying) {
+            return;
+          }
+
+          const elapsed = (Date.now() - startTime) * currentState.playbackRate / 1000;
+          const newTime = initialCurrentTime + elapsed;
+
+          if (newTime >= currentState.duration) {
+            // 再生終了
+            dispatch({ type: 'SET_CURRENT_TIME', payload: currentState.duration });
+            dispatch({ type: 'SET_PLAYING', payload: false });
+            dispatch({ type: 'SET_TIMER_ID', payload: null });
+          } else {
+            dispatch({ type: 'SET_CURRENT_TIME', payload: newTime });
+            const timerId = requestAnimationFrame(updateTime);
+            dispatch({ type: 'SET_TIMER_ID', payload: timerId });
+          }
+        };
+
+        const timerId = requestAnimationFrame(updateTime);
+        dispatch({ type: 'SET_TIMER_ID', payload: timerId });
+      }
+
+      // video 要素がある場合は同期
       if (state.videoElement) {
         try {
           await state.videoElement.play();
-          dispatch({ type: 'SET_PLAYING', payload: true });
         } catch (error) {
-          console.error('Play failed:', error);
-          dispatch({ type: 'SET_PLAYING', payload: false });
+          console.error('Video play failed (but timer continues):', error);
         }
       }
     },
 
     pause: () => {
+      const state = getState();
+
+      // タイマーを停止
+      if (state.timerId) {
+        cancelAnimationFrame(state.timerId);
+        dispatch({ type: 'SET_TIMER_ID', payload: null });
+      }
+
+      dispatch({ type: 'SET_PLAYING', payload: false });
+
+      // video 要素がある場合は同期
       if (state.videoElement) {
         state.videoElement.pause();
-        dispatch({ type: 'SET_PLAYING', payload: false });
       }
     },
 
     seekTo: (time: number) => {
-      dispatch({ type: 'SET_CURRENT_TIME', payload: time });
+      const state = getState();
+
+      // 時間を制限してから設定
+      const clampedTime = Math.max(0, Math.min(state.duration, time));
+      dispatch({ type: 'SET_CURRENT_TIME', payload: clampedTime });
+
+      // video 要素がある場合は同期
       if (state.videoElement) {
-        state.videoElement.currentTime = time;
+        state.videoElement.currentTime = clampedTime;
       }
     },
 
     setVolume: (volume: number) => {
       dispatch({ type: 'SET_VOLUME', payload: volume });
+      const state = getState();
       if (state.videoElement) {
         const clampedVolume = Math.max(0, Math.min(1, volume));
         state.videoElement.volume = clampedVolume;
@@ -145,10 +215,15 @@ export function createVideoEditorActions(
 
     setPlaybackRate: (rate: number) => {
       dispatch({ type: 'SET_PLAYBACK_RATE', payload: rate });
+      const state = getState();
       if (state.videoElement) {
         const clampedRate = Math.max(0.25, Math.min(4, rate));
         state.videoElement.playbackRate = clampedRate;
       }
+    },
+
+    setDuration: (duration: number) => {
+      dispatch({ type: 'SET_DURATION', payload: Math.max(0.1, duration) });
     },
 
     setTimelineRange: (start: number, end: number) => {
@@ -197,6 +272,11 @@ export function videoEditorReducer(state: VideoEditorState, action: VideoEditorA
       return { ...state, isPlaying: action.payload };
 
     case 'SET_CURRENT_TIME':
+      console.log('SET_CURRENT_TIME called:', {
+        from: state.currentTime,
+        to: action.payload,
+        stack: new Error().stack?.split('\n')[1]
+      });
       return { ...state, currentTime: action.payload };
 
     case 'SET_DURATION':
@@ -309,6 +389,12 @@ export function videoEditorReducer(state: VideoEditorState, action: VideoEditorA
       return {
         ...state,
         selectedTracks: [],
+      };
+
+    case 'SET_TIMER_ID':
+      return {
+        ...state,
+        timerId: action.payload,
       };
 
     default:

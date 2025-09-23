@@ -56,9 +56,7 @@ function DemoControls() {
 
       // 動画の読み込み完了を待つ
       state.videoElement.addEventListener('loadeddata', () => {
-        console.log('Video loaded successfully');
-        console.log('Video duration:', state.videoElement?.duration);
-        console.log('Video readyState:', state.videoElement?.readyState);
+        // 動画が読み込まれました
       }, { once: true });
 
       state.videoElement.addEventListener('error', (e) => {
@@ -133,36 +131,50 @@ function DemoControls() {
         </button>
       </div>
 
+      <div className="flex gap-2 items-center">
+        <label className="text-sm">Duration:</label>
+        <input
+          type="number"
+          min="1"
+          max="300"
+          step="1"
+          value={state.duration}
+          onChange={(e) => actions.setDuration(parseFloat(e.target.value) || 10)}
+          className="w-20 px-2 py-1 border rounded text-sm"
+        />
+        <span className="text-sm">seconds</span>
+        <button
+          onClick={() => actions.setDuration(30)}
+          className="rounded bg-gray-400 px-2 py-1 text-white text-sm hover:bg-gray-500"
+        >
+          30s
+        </button>
+        <button
+          onClick={() => actions.setDuration(60)}
+          className="rounded bg-gray-400 px-2 py-1 text-white text-sm hover:bg-gray-500"
+        >
+          60s
+        </button>
+      </div>
+
       <div className="flex gap-2">
         <button
-          onClick={async () => {
-            console.log('Play button clicked');
-            console.log('Video element:', state.videoElement);
-            console.log('Video readyState:', state.videoElement?.readyState);
-            console.log('Video src:', state.videoElement?.src);
-            try {
-              await actions.play();
-              console.log('Play action completed');
-            } catch (error) {
-              console.error('Play action failed:', error);
-            }
-          }}
+          onClick={actions.play}
           className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-          disabled={!state.videoElement || state.isPlaying}
+          disabled={state.isPlaying}
         >
-          Play
+          {state.isPlaying ? 'Playing...' : 'Play'}
         </button>
         <button
           onClick={actions.pause}
           className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-          disabled={!state.videoElement || !state.isPlaying}
+          disabled={!state.isPlaying}
         >
           Pause
         </button>
         <button
           onClick={() => actions.seekTo(0)}
           className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-          disabled={!state.videoElement}
         >
           Reset
         </button>
@@ -200,11 +212,15 @@ function DemoControls() {
       <div className="text-sm text-gray-600">
         <p>Instructions:</p>
         <ol className="list-inside list-decimal space-y-1">
-          <li>Click "Load Sample Video" to load a test video</li>
+          <li>Set the duration (default: 10 seconds) - no video required!</li>
           <li>Add text tracks with different timing</li>
           <li>Use Play/Pause controls to see text appearing at specified times</li>
           <li>Use the seek bar to jump to different times</li>
+          <li>Optionally load a video for background</li>
         </ol>
+        <p className="mt-2 text-xs text-green-600">
+          ✨ This editor works independently without requiring a video file!
+        </p>
       </div>
     </div>
   );
