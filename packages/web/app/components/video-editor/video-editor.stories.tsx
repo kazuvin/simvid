@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { VideoEditor, type VideoProject } from '../video-editor';
-import { useVideoEditor } from '../contexts';
+import { VideoEditor } from './video-editor';
+import type { VideoProject } from './schemas';
+import { useVideoEditor } from './contexts';
 
 const meta: Meta<typeof VideoEditor> = {
   title: 'Components/VideoEditor/VideoEditor',
@@ -37,7 +38,7 @@ const meta: Meta<typeof VideoEditor> = {
 export default meta;
 type Story = StoryObj<typeof VideoEditor>;
 
-// Sample project data
+// Sample project configurations
 const defaultProject: VideoProject = {
   name: 'Default Demo Project',
   duration: 10,
@@ -334,7 +335,7 @@ const emptyProject: VideoProject = {
   tracks: [],
 };
 
-// Demo component wrapper with feature description
+// Demo wrapper with feature descriptions
 function VideoEditorDemo(props: any) {
   return (
     <div className="space-y-4">
@@ -355,6 +356,7 @@ function VideoEditorDemo(props: any) {
   );
 }
 
+// Story definitions
 export const Default: Story = {
   args: {
     project: defaultProject,
@@ -445,7 +447,8 @@ export const MixedMedia: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Video editor with background video, picture-in-picture overlay, and text tracks. Demonstrates canvas-based video rendering with transforms.',
+        story:
+          'Video editor with background video, picture-in-picture overlay, and text tracks. Demonstrates canvas-based video rendering with transforms.',
       },
     },
   },
@@ -461,7 +464,8 @@ export const VideoTransforms: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'High resolution video editor showcasing advanced video transformations: rotation, scaling, positioning, and opacity. Features multiple video layers with different object-fit modes.',
+        story:
+          'High resolution video editor showcasing advanced video transformations: rotation, scaling, positioning, and opacity. Features multiple video layers with different object-fit modes.',
       },
     },
   },
@@ -500,7 +504,7 @@ export const CustomStyling: Story = {
   },
 };
 
-// Interactive playground story
+// Interactive playground
 function InteractiveDemo(props: any) {
   function InteractiveController() {
     const { state, actions } = useVideoEditor();

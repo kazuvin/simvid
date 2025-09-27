@@ -1,34 +1,6 @@
 import { createContext, useContext } from 'react';
-import type { VideoEditorActions } from './reducer';
-
-export interface VideoEditorState {
-  canvas: HTMLCanvasElement | null;
-  videoElement: HTMLVideoElement | null;
-  isPlaying: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  playbackRate: number;
-  timeline: {
-    start: number;
-    end: number;
-    zoom: number;
-  };
-  selectedTracks: string[];
-  tracks: VideoTrack[];
-  timerId: number | null;
-}
-
-export interface VideoTrack {
-  id: string;
-  type: 'video' | 'audio' | 'text';
-  name: string;
-  startTime: number;
-  endTime: number;
-  source?: string;
-  enabled: boolean;
-  locked: boolean;
-}
+import type { VideoEditorState } from './types';
+import type { VideoEditorActions } from './actions';
 
 export interface VideoEditorContextValue {
   state: VideoEditorState;
@@ -44,4 +16,3 @@ export function useVideoEditor() {
   }
   return context;
 }
-

@@ -1,4 +1,4 @@
-export * from './provider';
-export * from './context';
-export * from './reducer';
-
+export { VideoEditorProvider } from './provider';
+export { useVideoEditor } from './context';
+export type { VideoEditorState, VideoTrack } from './types';
+export type { VideoEditorActions } from './actions';

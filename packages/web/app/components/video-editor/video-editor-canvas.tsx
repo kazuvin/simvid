@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { cn } from '~/utils/cn';
 import { useVideoEditor } from './contexts';
 
@@ -17,11 +17,10 @@ export function VideoEditorCanvas({
 }: VideoEditorCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const videoElementsRef = useRef<Map<string, HTMLVideoElement>>(new Map());
   const { state, actions } = useVideoEditor();
 
-  // video track の video element を管理
   const ensureVideoElement = useCallback((track: any) => {
     const existingElement = videoElementsRef.current.get(track.id);
     if (existingElement) {
@@ -31,7 +30,6 @@ export function VideoEditorCanvas({
     if (track.type === 'video' && track.source) {
       const videoElement = document.createElement('video');
 
-      // 外部URLの場合のみCORS設定
       const isExternalUrl = track.source.startsWith('http') &&
                            !track.source.includes(window.location.hostname);
 
@@ -45,7 +43,6 @@ export function VideoEditorCanvas({
       videoElement.preload = 'auto';
       videoElement.playsInline = true;
 
-      // 非表示でDOMに追加
       videoElement.style.position = 'absolute';
       videoElement.style.left = '-9999px';
       videoElement.style.top = '-9999px';
@@ -66,12 +63,10 @@ export function VideoEditorCanvas({
     return null;
   }, []);
 
-  // tracks が変更されたときに video element を更新
   useEffect(() => {
     const currentElements = new Set(videoElementsRef.current.keys());
     const currentTrackIds = new Set(state.tracks.filter(t => t.type === 'video').map(t => t.id));
 
-    // 削除されたtrackのvideo elementをクリーンアップ
     for (const trackId of currentElements) {
       if (!currentTrackIds.has(trackId)) {
         const element = videoElementsRef.current.get(trackId);
@@ -86,7 +81,6 @@ export function VideoEditorCanvas({
       }
     }
 
-    // 新しいtrackのvideo elementを作成
     state.tracks.forEach(track => {
       if (track.type === 'video') {
         ensureVideoElement(track);
@@ -94,14 +88,12 @@ export function VideoEditorCanvas({
     });
   }, [state.tracks, ensureVideoElement]);
 
-  // Canvas と Video 要素の初期化（一度だけ実行）
   const initRef = useRef(false);
   useEffect(() => {
     if (!initRef.current) {
       if (canvasRef.current) {
         actions.setCanvas(canvasRef.current);
       }
-      // Video要素は常に設定（イベントリスナーはsrcがある時のみ有効）
       if (videoRef.current) {
         actions.setVideoElement(videoRef.current);
       }
@@ -115,7 +107,6 @@ export function VideoEditorCanvas({
     };
   }, [actions]);
 
-  // テキストの描画
   const renderText = useCallback((
     ctx: CanvasRenderingContext2D,
     track: any,
@@ -124,7 +115,6 @@ export function VideoEditorCanvas({
   ) => {
     ctx.save();
 
-    // テキストの設定（トラックのメタデータから取得、なければデフォルト）
     const fontSize = track.metadata?.fontSize || 32;
     const fontFamily = track.metadata?.fontFamily || 'Arial';
     const color = track.metadata?.color || '#ffffff';
@@ -138,30 +128,25 @@ export function VideoEditorCanvas({
     ctx.textAlign = textAlign as CanvasTextAlign;
     ctx.textBaseline = baseline as CanvasTextBaseline;
 
-    // テキストに影を追加
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
 
-    // テキストを描画
     const text = track.metadata?.text || track.name;
     ctx.fillText(text, x, y);
 
     ctx.restore();
   }, []);
 
-  // ビデオの描画
   const renderVideo = useCallback((
     ctx: CanvasRenderingContext2D,
     track: any,
     canvasWidth: number,
     canvasHeight: number
   ) => {
-    // canvas で管理されている video element を取得（優先）
     let videoElement = videoElementsRef.current.get(track.id) || track.videoElement;
 
-    // video element が存在しない場合は作成を試行
     if (!videoElement && track.type === 'video' && track.source) {
       videoElement = ensureVideoElement(track);
       if (!videoElement) {
@@ -173,12 +158,10 @@ export function VideoEditorCanvas({
       return;
     }
 
-    // readyState が最低限 HAVE_METADATA (1) あればメタデータは取得できている
     if (videoElement.readyState < 1) {
       return;
     }
 
-    // videoWidth と videoHeight が 0 の場合は実際の動画データがまだない
     if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
       return;
     }
@@ -189,11 +172,9 @@ export function VideoEditorCanvas({
     const objectFit = track.metadata?.objectFit || 'cover';
 
     if (layout === 'fullscreen') {
-      // フルスクリーン描画
       const opacity = track.metadata?.transform?.opacity ?? 1;
       ctx.globalAlpha = opacity;
 
-      // object-fit の計算
       const videoAspect = videoElement.videoWidth / videoElement.videoHeight;
       const canvasAspect = canvasWidth / canvasHeight;
 
@@ -222,7 +203,6 @@ export function VideoEditorCanvas({
 
       ctx.drawImage(videoElement, drawX, drawY, drawWidth, drawHeight);
     } else if (layout === 'custom' && track.metadata?.transform) {
-      // カスタム描画
       const transform = track.metadata.transform;
       const x = transform.x || 0;
       const y = transform.y || 0;
@@ -235,23 +215,19 @@ export function VideoEditorCanvas({
 
       ctx.globalAlpha = opacity;
 
-      // 変形の中心点
       const centerX = x + width / 2;
       const centerY = y + height / 2;
 
-      // 変形を適用
       ctx.translate(centerX, centerY);
       ctx.rotate(rotation);
       ctx.scale(scaleX, scaleY);
 
-      // ビデオを描画（中心が原点になるように調整）
       ctx.drawImage(videoElement, -width / 2, -height / 2, width, height);
     }
 
     ctx.restore();
   }, [ensureVideoElement]);
 
-  // video element の再生制御を同期
   useEffect(() => {
     videoElementsRef.current.forEach((videoElement, trackId) => {
       const track = state.tracks.find(t => t.id === trackId);
@@ -271,7 +247,6 @@ export function VideoEditorCanvas({
     });
   }, [state.isPlaying, state.currentTime, state.tracks]);
 
-  // 描画とアニメーション管理
   useEffect(() => {
     const render = () => {
       const canvas = canvasRef.current;
@@ -280,23 +255,18 @@ export function VideoEditorCanvas({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Canvas をクリア
       ctx.clearRect(0, 0, width, height);
 
-      // 背景を描画（動画がない場合はグラデーション背景）
       const video = videoRef.current;
       if (video && video.readyState >= 2 && video.src) {
-        // 動画がある場合は動画を描画
         ctx.drawImage(video, 0, 0, width, height);
       } else {
-        // 動画がない場合はデフォルト背景を描画
         const gradient = ctx.createLinearGradient(0, 0, width, height);
         gradient.addColorStop(0, '#1a1a2e');
         gradient.addColorStop(1, '#16213e');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
 
-        // グリッドパターンを追加（オプション）
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 1;
         const gridSize = 50;
@@ -314,7 +284,6 @@ export function VideoEditorCanvas({
         }
       }
 
-      // 現在時刻に基づいてトラックを描画
       const currentTime = state.currentTime;
 
       state.tracks.forEach(track => {
@@ -330,7 +299,6 @@ export function VideoEditorCanvas({
             renderText(ctx, track, width, height);
             break;
           case 'audio':
-            // オーディオは Canvas に描画しない
             break;
         }
       });
@@ -346,7 +314,6 @@ export function VideoEditorCanvas({
     if (state.isPlaying) {
       animate();
     } else {
-      // 停止時も一度描画して最新の状態を反映
       render();
     }
 
@@ -355,7 +322,7 @@ export function VideoEditorCanvas({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [state.isPlaying, state.currentTime, state.tracks, width, height, renderText]);
+  }, [state.isPlaying, state.currentTime, state.tracks, width, height, renderText, renderVideo]);
 
   return (
     <div className={cn("relative", className)}>
@@ -366,7 +333,6 @@ export function VideoEditorCanvas({
         className="border border-border rounded-lg bg-black"
       />
 
-      {/* 非表示の video 要素（描画ソースとして使用） */}
       <video
         ref={videoRef}
         className="hidden"
@@ -375,7 +341,6 @@ export function VideoEditorCanvas({
         muted={false}
       />
 
-      {/* デバッグ情報 */}
       {showDebugInfo && (
         <div className="absolute top-2 left-2 bg-black/50 text-white text-xs p-2 rounded">
           <div>Time: {(Math.floor(state.currentTime * 10) / 10).toFixed(1)}s</div>
