@@ -30,9 +30,29 @@ export interface InitialVideoTrack {
   enabled?: boolean;
   locked?: boolean;
   source: string;
+
+  // レイアウト設定（簡単な配置用）
+  layout?: 'fullscreen' | 'custom';
+
+  // 詳細座標設定（custom時に使用）
+  transform?: {
+    x: number;      // 左上のX座標
+    y: number;      // 左上のY座標
+    width: number;  // 幅
+    height: number; // 高さ
+    scaleX?: number; // X軸スケール (1.0 = 100%)
+    scaleY?: number; // Y軸スケール (1.0 = 100%)
+    rotation?: number; // 回転角度（度）
+    opacity?: number; // 透明度 (0-1)
+  };
+
+  // ビデオ固有設定
   volume?: number;
   muted?: boolean;
-  opacity?: number;
+  playbackRate?: number;
+
+  // フィット設定
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 }
 
 export interface InitialAudioTrack {
@@ -154,9 +174,21 @@ function VideoEditorContent({
           type: 'video',
           source: initialTrack.source,
           metadata: {
+            layout: initialTrack.layout ?? 'fullscreen',
+            transform: initialTrack.transform ?? (initialTrack.layout === 'custom' ? {
+              x: 0,
+              y: 0,
+              width: effectiveWidth,
+              height: effectiveHeight,
+              scaleX: 1,
+              scaleY: 1,
+              rotation: 0,
+              opacity: 1,
+            } : undefined),
             volume: initialTrack.volume ?? 1,
             muted: initialTrack.muted ?? false,
-            opacity: initialTrack.opacity ?? 1,
+            playbackRate: initialTrack.playbackRate ?? 1,
+            objectFit: initialTrack.objectFit ?? 'cover',
           },
         };
         actions.addTrack(videoTrack);

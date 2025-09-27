@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { VideoEditor, type VideoProject, type InitialTrack } from '../video-editor';
+import { VideoEditor, type VideoProject } from '../video-editor';
 import { useVideoEditor } from '../contexts';
-import { useEffect } from 'react';
 
 const meta: Meta<typeof VideoEditor> = {
   title: 'Components/VideoEditor/VideoEditor',
@@ -206,13 +205,43 @@ const multiLayerProject: VideoProject = {
 
 const mixedMediaProject: VideoProject = {
   name: 'Mixed Media Demo',
-  duration: 10,
+  duration: 15,
   output: {
     width: 800,
     height: 450,
     frameRate: 30,
   },
   tracks: [
+    {
+      type: 'video',
+      name: 'Background Video',
+      source: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      startTime: 0,
+      endTime: 12,
+      layout: 'fullscreen',
+      volume: 0.3,
+      objectFit: 'cover',
+    },
+    {
+      type: 'video',
+      name: 'Picture-in-Picture',
+      source: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      startTime: 3,
+      endTime: 10,
+      layout: 'custom',
+      transform: {
+        x: 500,
+        y: 50,
+        width: 250,
+        height: 150,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+        opacity: 0.9,
+      },
+      volume: 0.1,
+      objectFit: 'cover',
+    },
     {
       type: 'text',
       name: 'Opening Title',
@@ -226,16 +255,71 @@ const mixedMediaProject: VideoProject = {
     {
       type: 'text',
       name: 'Subtitle',
-      text: 'Supports multiple track types',
+      text: 'Video + Text Overlay',
       startTime: 4,
       endTime: 8,
       fontSize: 24,
       color: '#ffdd44',
       y: 350,
     },
+    {
+      type: 'text',
+      name: 'Final Message',
+      text: 'Canvas-based rendering with transforms',
+      startTime: 10,
+      endTime: 15,
+      fontSize: 32,
+      color: '#44ff88',
+      y: 225,
+    },
   ],
   settings: {
     backgroundColor: '#1e293b',
+  },
+};
+
+const videoOnlyProject: VideoProject = {
+  name: 'Video-Only Demo',
+  duration: 20,
+  output: {
+    width: 1280,
+    height: 720,
+    frameRate: 30,
+  },
+  tracks: [
+    {
+      type: 'video',
+      name: 'Main Video',
+      source: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      startTime: 0,
+      endTime: 15,
+      layout: 'fullscreen',
+      volume: 1,
+      objectFit: 'cover',
+    },
+    {
+      type: 'video',
+      name: 'Rotated Overlay',
+      source: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      startTime: 5,
+      endTime: 12,
+      layout: 'custom',
+      transform: {
+        x: 200,
+        y: 100,
+        width: 400,
+        height: 300,
+        scaleX: 0.8,
+        scaleY: 0.8,
+        rotation: 15,
+        opacity: 0.7,
+      },
+      volume: 0.2,
+      objectFit: 'contain',
+    },
+  ],
+  settings: {
+    backgroundColor: '#000000',
   },
 };
 
@@ -255,9 +339,9 @@ function VideoEditorDemo(props: any) {
   return (
     <div className="space-y-4">
       <VideoEditor {...props} />
-      <div className="text-sm text-muted-foreground max-w-2xl">
-        <p className="font-medium mb-2">Features demonstrated:</p>
-        <ul className="list-disc list-inside space-y-1">
+      <div className="text-muted-foreground max-w-2xl text-sm">
+        <p className="mb-2 font-medium">Features demonstrated:</p>
+        <ul className="list-inside list-disc space-y-1">
           <li>Professional timeline with drag-to-seek functionality</li>
           <li>Play/pause controls with frame-by-frame navigation</li>
           <li>Multiple playback speeds (0.25x to 4x)</li>
@@ -361,7 +445,23 @@ export const MixedMedia: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Video editor demonstrating mixed media support (text, video, audio tracks).',
+        story: 'Video editor with background video, picture-in-picture overlay, and text tracks. Demonstrates canvas-based video rendering with transforms.',
+      },
+    },
+  },
+};
+
+export const VideoTransforms: Story = {
+  args: {
+    project: videoOnlyProject,
+    showControls: true,
+    showDebugInfo: false,
+  },
+  render: (args) => <VideoEditorDemo {...args} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'High resolution video editor showcasing advanced video transformations: rotation, scaling, positioning, and opacity. Features multiple video layers with different object-fit modes.',
       },
     },
   },
@@ -439,39 +539,39 @@ function InteractiveDemo(props: any) {
     };
 
     const clearAllTracks = () => {
-      state.tracks.forEach(track => actions.removeTrack(track.id));
+      state.tracks.forEach((track) => actions.removeTrack(track.id));
     };
 
     return (
-      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-        <h3 className="font-medium mb-3">Interactive Controls</h3>
+      <div className="bg-muted/50 mt-4 rounded-lg p-4">
+        <h3 className="mb-3 font-medium">Interactive Controls</h3>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={addRandomTextTrack}
-            className="bg-primary text-primary-foreground px-3 py-1 rounded text-sm hover:bg-primary/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1 text-sm"
           >
             Add Random Text
           </button>
           <button
             onClick={clearAllTracks}
-            className="bg-destructive text-destructive-foreground px-3 py-1 rounded text-sm hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded px-3 py-1 text-sm"
           >
             Clear All Tracks
           </button>
           <button
             onClick={() => actions.setDuration(30)}
-            className="bg-secondary text-secondary-foreground px-3 py-1 rounded text-sm hover:bg-secondary/90"
+            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded px-3 py-1 text-sm"
           >
             30s Duration
           </button>
           <button
             onClick={() => actions.setDuration(60)}
-            className="bg-secondary text-secondary-foreground px-3 py-1 rounded text-sm hover:bg-secondary/90"
+            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded px-3 py-1 text-sm"
           >
             60s Duration
           </button>
         </div>
-        <div className="mt-3 text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-3 text-xs">
           Current tracks: {state.tracks.length} | Duration: {state.duration}s | Time: {state.currentTime.toFixed(1)}s
         </div>
       </div>
@@ -520,3 +620,4 @@ export const EmptyEditor: Story = {
     },
   },
 };
+

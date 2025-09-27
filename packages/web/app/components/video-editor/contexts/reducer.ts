@@ -179,9 +179,26 @@ export function createVideoEditorActions(
         try {
           await state.videoElement.play();
         } catch (error) {
-          console.error('Video play failed (but timer continues):', error);
+          // Video play failed, but timer continues
         }
       }
+
+      // video track の video element も同期
+      state.tracks.forEach(track => {
+        if (track.type === 'video' && (track as any).videoElement) {
+          const videoElement = (track as any).videoElement;
+          try {
+            // トラックの時間範囲内でのみ再生
+            const trackTime = state.currentTime - track.startTime;
+            if (trackTime >= 0 && trackTime <= (track.endTime - track.startTime)) {
+              videoElement.currentTime = trackTime;
+              videoElement.play();
+            }
+          } catch (error) {
+            // Ignore play errors
+          }
+        }
+      });
     },
 
     pause: () => {
@@ -199,6 +216,14 @@ export function createVideoEditorActions(
       if (state.videoElement) {
         state.videoElement.pause();
       }
+
+      // video track の video element も同期
+      state.tracks.forEach(track => {
+        if (track.type === 'video' && (track as any).videoElement) {
+          const videoElement = (track as any).videoElement;
+          videoElement.pause();
+        }
+      });
     },
 
     seekTo: (time: number) => {
@@ -212,6 +237,17 @@ export function createVideoEditorActions(
       if (state.videoElement) {
         state.videoElement.currentTime = clampedTime;
       }
+
+      // video track の video element も同期
+      state.tracks.forEach(track => {
+        if (track.type === 'video' && (track as any).videoElement) {
+          const videoElement = (track as any).videoElement;
+          const trackTime = clampedTime - track.startTime;
+          if (trackTime >= 0 && trackTime <= (track.endTime - track.startTime)) {
+            videoElement.currentTime = trackTime;
+          }
+        }
+      });
     },
 
     setVolume: (volume: number) => {
@@ -331,20 +367,75 @@ export function videoEditorReducer(state: VideoEditorState, action: VideoEditorA
       if (state.tracks.some((track) => track.id === action.payload.id)) {
         return state;
       }
+
+      const newTrack = {
+        ...action.payload,
+        // ビジネスロジック: 新しいトラックのデフォルト値設定
+        startTime: Math.max(0, action.payload.startTime),
+        endTime: Math.min(state.duration, Math.max(action.payload.startTime, action.payload.endTime)),
+      };
+
+      // video track の場合は video element を作成
+      if (newTrack.type === 'video' && newTrack.source) {
+        const videoElement = document.createElement('video');
+
+        // 外部URLの場合のみCORS設定
+        const isExternalUrl = newTrack.source.startsWith('http') &&
+                             !newTrack.source.includes(window.location.hostname);
+
+        if (isExternalUrl) {
+          videoElement.crossOrigin = 'anonymous';
+        }
+
+        videoElement.muted = newTrack.metadata?.muted ?? true; // デフォルトでmuted（autoplay policy対応）
+        videoElement.volume = newTrack.metadata?.volume ?? 1;
+        videoElement.playbackRate = newTrack.metadata?.playbackRate ?? 1;
+        videoElement.preload = 'auto'; // metadataからautoに変更
+        videoElement.playsInline = true; // モバイル対応
+
+
+        // video element を非表示でDOMに追加（一部のブラウザで必要）
+        videoElement.style.position = 'absolute';
+        videoElement.style.left = '-9999px';
+        videoElement.style.top = '-9999px';
+        videoElement.style.width = '1px';
+        videoElement.style.height = '1px';
+        videoElement.style.opacity = '0';
+        videoElement.style.pointerEvents = 'none';
+
+        document.body.appendChild(videoElement);
+
+        // srcを設定してload()を呼び出し
+        videoElement.src = newTrack.source;
+        videoElement.load();
+
+        // video element をトラックに関連付け
+        (newTrack as any).videoElement = videoElement;
+      }
+
       return {
         ...state,
         tracks: [
           ...state.tracks,
-          {
-            ...action.payload,
-            // ビジネスロジック: 新しいトラックのデフォルト値設定
-            startTime: Math.max(0, action.payload.startTime),
-            endTime: Math.min(state.duration, Math.max(action.payload.startTime, action.payload.endTime)),
-          },
+          newTrack,
         ],
       };
 
     case 'REMOVE_TRACK':
+      // 削除するトラックを見つけて video element をクリーンアップ
+      const trackToRemove = state.tracks.find((track) => track.id === action.payload);
+      if (trackToRemove && trackToRemove.type === 'video' && (trackToRemove as any).videoElement) {
+        const videoElement = (trackToRemove as any).videoElement;
+        videoElement.pause();
+        videoElement.src = '';
+        videoElement.load();
+
+        // DOMから削除
+        if (videoElement.parentNode) {
+          videoElement.parentNode.removeChild(videoElement);
+        }
+      }
+
       return {
         ...state,
         tracks: state.tracks.filter((track) => track.id !== action.payload),
