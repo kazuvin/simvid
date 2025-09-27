@@ -6,12 +6,14 @@ interface VideoEditorCanvasProps {
   width?: number;
   height?: number;
   className?: string;
+  showDebugInfo?: boolean;
 }
 
 export function VideoEditorCanvas({
   width = 800,
   height = 450,
-  className
+  className,
+  showDebugInfo = false
 }: VideoEditorCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -180,12 +182,14 @@ export function VideoEditorCanvas({
       />
 
       {/* デバッグ情報 */}
-      <div className="absolute top-2 left-2 bg-black/50 text-white text-xs p-2 rounded">
-        <div>Time: {state.currentTime.toFixed(2)}s</div>
-        <div>Duration: {state.duration.toFixed(2)}s</div>
-        <div>Playing: {state.isPlaying ? 'Yes' : 'No'}</div>
-        <div>Tracks: {state.tracks.length}</div>
-      </div>
+      {showDebugInfo && (
+        <div className="absolute top-2 left-2 bg-black/50 text-white text-xs p-2 rounded">
+          <div>Time: {(Math.floor(state.currentTime * 10) / 10).toFixed(1)}s</div>
+          <div>Duration: {state.duration.toFixed(1)}s</div>
+          <div>Playing: {state.isPlaying ? 'Yes' : 'No'}</div>
+          <div>Tracks: {state.tracks.length}</div>
+        </div>
+      )}
     </div>
   );
 }

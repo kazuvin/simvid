@@ -136,6 +136,8 @@ export function createVideoEditorActions(
         const startTime = Date.now();
         const initialCurrentTime = state.currentTime;
 
+        let lastUpdateTime = startTime;
+
         const updateTime = () => {
           const currentState = getState();
 
@@ -144,7 +146,16 @@ export function createVideoEditorActions(
             return;
           }
 
-          const elapsed = ((Date.now() - startTime) * currentState.playbackRate) / 1000;
+          const now = Date.now();
+          // UI更新を33ms間隔（約30FPS）に制限して滑らかにする
+          if (now - lastUpdateTime < 33) {
+            const timerId = requestAnimationFrame(updateTime);
+            dispatch({ type: 'SET_TIMER_ID', payload: timerId });
+            return;
+          }
+
+          lastUpdateTime = now;
+          const elapsed = ((now - startTime) * currentState.playbackRate) / 1000;
           const newTime = initialCurrentTime + elapsed;
 
           if (newTime >= currentState.duration) {
