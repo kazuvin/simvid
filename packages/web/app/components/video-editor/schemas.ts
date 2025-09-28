@@ -98,11 +98,26 @@ export const initialAudioTrackSchema = z.object({
   muted: z.boolean().optional(),
 });
 
+// Image track schema
+export const initialImageTrackSchema = z.object({
+  type: z.literal('image'),
+  name: z.string().optional(),
+  startTime: z.number().min(0),
+  endTime: z.number().min(0),
+  enabled: z.boolean().optional(),
+  locked: z.boolean().optional(),
+  source: z.url(),
+  layout: z.enum(VideoLayout).optional(),
+  transform: transformSchema.optional(),
+  objectFit: z.enum(ObjectFit).optional(),
+});
+
 // Union of all track types
 export const initialTrackSchema = z.discriminatedUnion('type', [
   initialTextTrackSchema,
   initialVideoTrackSchema,
   initialAudioTrackSchema,
+  initialImageTrackSchema,
 ]);
 
 // Output settings schema
@@ -136,6 +151,7 @@ export type Transform = z.infer<typeof transformSchema>;
 export type InitialTextTrack = z.infer<typeof initialTextTrackSchema>;
 export type InitialVideoTrack = z.infer<typeof initialVideoTrackSchema>;
 export type InitialAudioTrack = z.infer<typeof initialAudioTrackSchema>;
+export type InitialImageTrack = z.infer<typeof initialImageTrackSchema>;
 export type InitialTrack = z.infer<typeof initialTrackSchema>;
 export type OutputSettings = z.infer<typeof outputSettingsSchema>;
 export type ProjectSettings = z.infer<typeof projectSettingsSchema>;

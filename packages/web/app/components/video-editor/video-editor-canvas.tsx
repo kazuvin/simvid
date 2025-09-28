@@ -19,6 +19,7 @@ export function VideoEditorCanvas({
   const videoRef = useRef<HTMLVideoElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const videoElementsRef = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const imageElementsRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const { state, actions } = useVideoEditor();
 
   const ensureVideoElement = useCallback((track: any) => {
@@ -63,12 +64,50 @@ export function VideoEditorCanvas({
     return null;
   }, []);
 
-  useEffect(() => {
-    const currentElements = new Set(videoElementsRef.current.keys());
-    const currentTrackIds = new Set(state.tracks.filter(t => t.type === 'video').map(t => t.id));
+  const ensureImageElement = useCallback((track: any): HTMLImageElement | undefined => {
+    const existingElement = imageElementsRef.current.get(track.id);
+    if (existingElement) {
+      return existingElement;
+    }
 
-    for (const trackId of currentElements) {
-      if (!currentTrackIds.has(trackId)) {
+    if (track.type === 'image' && track.source) {
+      const imageElement = document.createElement('img');
+
+      const isExternalUrl = track.source.startsWith('http') &&
+                           !track.source.includes(window.location.hostname);
+
+      if (isExternalUrl) {
+        imageElement.crossOrigin = 'anonymous';
+      }
+
+      imageElement.style.position = 'absolute';
+      imageElement.style.left = '-9999px';
+      imageElement.style.top = '-9999px';
+      imageElement.style.width = '1px';
+      imageElement.style.height = '1px';
+      imageElement.style.opacity = '0';
+      imageElement.style.pointerEvents = 'none';
+
+      document.body.appendChild(imageElement);
+
+      imageElement.src = track.source;
+
+      imageElementsRef.current.set(track.id, imageElement);
+      return imageElement;
+    }
+
+    return undefined;
+  }, []);
+
+  useEffect(() => {
+    const currentVideoElements = new Set(videoElementsRef.current.keys());
+    const currentVideoTrackIds = new Set(state.tracks.filter(t => t.type === 'video').map(t => t.id));
+    const currentImageElements = new Set(imageElementsRef.current.keys());
+    const currentImageTrackIds = new Set(state.tracks.filter(t => t.type === 'image').map(t => t.id));
+
+    // Clean up video elements
+    for (const trackId of currentVideoElements) {
+      if (!currentVideoTrackIds.has(trackId)) {
         const element = videoElementsRef.current.get(trackId);
         if (element) {
           element.pause();
@@ -81,12 +120,28 @@ export function VideoEditorCanvas({
       }
     }
 
+    // Clean up image elements
+    for (const trackId of currentImageElements) {
+      if (!currentImageTrackIds.has(trackId)) {
+        const element = imageElementsRef.current.get(trackId);
+        if (element) {
+          element.src = '';
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
+          imageElementsRef.current.delete(trackId);
+        }
+      }
+    }
+
     state.tracks.forEach(track => {
       if (track.type === 'video') {
         ensureVideoElement(track);
+      } else if (track.type === 'image') {
+        ensureImageElement(track);
       }
     });
-  }, [state.tracks, ensureVideoElement]);
+  }, [state.tracks, ensureVideoElement, ensureImageElement]);
 
   const initRef = useRef(false);
   useEffect(() => {
@@ -228,6 +283,84 @@ export function VideoEditorCanvas({
     ctx.restore();
   }, [ensureVideoElement]);
 
+  const renderImage = useCallback((
+    ctx: CanvasRenderingContext2D,
+    track: any,
+    canvasWidth: number,
+    canvasHeight: number
+  ) => {
+    let imageElement = imageElementsRef.current.get(track.id);
+
+    if (!imageElement && track.type === 'image' && track.source) {
+      imageElement = ensureImageElement(track);
+    }
+
+    if (!imageElement || !imageElement.complete || imageElement.naturalWidth === 0) {
+      return;
+    }
+
+    ctx.save();
+
+    const layout = track.metadata?.layout || 'fullscreen';
+    const objectFit = track.metadata?.objectFit || 'cover';
+
+    if (layout === 'fullscreen') {
+      const opacity = track.metadata?.transform?.opacity ?? 1;
+      ctx.globalAlpha = opacity;
+
+      const imageAspect = imageElement.naturalWidth / imageElement.naturalHeight;
+      const canvasAspect = canvasWidth / canvasHeight;
+
+      let drawWidth = canvasWidth;
+      let drawHeight = canvasHeight;
+      let drawX = 0;
+      let drawY = 0;
+
+      if (objectFit === 'cover') {
+        if (imageAspect > canvasAspect) {
+          drawWidth = canvasHeight * imageAspect;
+          drawX = (canvasWidth - drawWidth) / 2;
+        } else {
+          drawHeight = canvasWidth / imageAspect;
+          drawY = (canvasHeight - drawHeight) / 2;
+        }
+      } else if (objectFit === 'contain') {
+        if (imageAspect > canvasAspect) {
+          drawHeight = canvasWidth / imageAspect;
+          drawY = (canvasHeight - drawHeight) / 2;
+        } else {
+          drawWidth = canvasHeight * imageAspect;
+          drawX = (canvasWidth - drawWidth) / 2;
+        }
+      }
+
+      ctx.drawImage(imageElement, drawX, drawY, drawWidth, drawHeight);
+    } else if (layout === 'custom' && track.metadata?.transform) {
+      const transform = track.metadata.transform;
+      const x = transform.x || 0;
+      const y = transform.y || 0;
+      const width = transform.width || canvasWidth;
+      const height = transform.height || canvasHeight;
+      const scaleX = transform.scaleX || 1;
+      const scaleY = transform.scaleY || 1;
+      const rotation = (transform.rotation || 0) * Math.PI / 180;
+      const opacity = transform.opacity ?? 1;
+
+      ctx.globalAlpha = opacity;
+
+      const centerX = x + width / 2;
+      const centerY = y + height / 2;
+
+      ctx.translate(centerX, centerY);
+      ctx.rotate(rotation);
+      ctx.scale(scaleX, scaleY);
+
+      ctx.drawImage(imageElement, -width / 2, -height / 2, width, height);
+    }
+
+    ctx.restore();
+  }, [ensureImageElement]);
+
   useEffect(() => {
     videoElementsRef.current.forEach((videoElement, trackId) => {
       const track = state.tracks.find(t => t.id === trackId);
@@ -295,6 +428,9 @@ export function VideoEditorCanvas({
           case 'video':
             renderVideo(ctx, track, width, height);
             break;
+          case 'image':
+            renderImage(ctx, track, width, height);
+            break;
           case 'text':
             renderText(ctx, track, width, height);
             break;
@@ -322,7 +458,7 @@ export function VideoEditorCanvas({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [state.isPlaying, state.currentTime, state.tracks, width, height, renderText, renderVideo]);
+  }, [state.isPlaying, state.currentTime, state.tracks, width, height, renderText, renderVideo, renderImage]);
 
   return (
     <div className={cn("relative", className)}>

@@ -76,6 +76,28 @@ export function convertInitialTrackToVideoTrack(
     };
   }
 
+  if (initialTrack.type === 'image') {
+    return {
+      ...baseTrack,
+      type: 'image',
+      source: initialTrack.source,
+      metadata: {
+        layout: initialTrack.layout ?? VideoLayout.FULLSCREEN,
+        transform: initialTrack.transform ?? (initialTrack.layout === VideoLayout.CUSTOM ? {
+          x: 0,
+          y: 0,
+          width: effectiveWidth,
+          height: effectiveHeight,
+          scaleX: 1,
+          scaleY: 1,
+          rotation: 0,
+          opacity: 1,
+        } : undefined),
+        objectFit: initialTrack.objectFit ?? ObjectFit.COVER,
+      },
+    };
+  }
+
   throw new Error(`Unknown track type: ${(initialTrack as any).type}`);
 }
 

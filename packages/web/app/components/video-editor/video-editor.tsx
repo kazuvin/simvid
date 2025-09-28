@@ -3,6 +3,7 @@ import { cn } from '~/utils/cn';
 import { VideoEditorProvider, useVideoEditor } from './contexts';
 import { VideoEditorCanvas } from './video-editor-canvas';
 import { VideoEditorControl } from './video-editor-control';
+import { ImageTrackUploader } from './image-track-uploader';
 import type { VideoProject, InitialTrack } from './schemas';
 import { convertInitialTrackToVideoTrack, resolveEffectiveValues } from './utils';
 
@@ -11,6 +12,7 @@ interface VideoEditorProps {
   className?: string;
   showControls?: boolean;
   showDebugInfo?: boolean;
+  showImageUploader?: boolean;
   project: VideoProject;
   onProjectChange?: (project: VideoProject) => void;
 
@@ -30,6 +32,7 @@ function VideoEditorContent({
   className,
   showControls = true,
   showDebugInfo = false,
+  showImageUploader = false,
   project,
   onProjectChange,
   // Backward compatibility props
@@ -72,6 +75,11 @@ function VideoEditorContent({
       )}
       style={project?.settings?.backgroundColor ? { backgroundColor: project.settings.backgroundColor } : undefined}
     >
+      {showImageUploader && (
+        <div className="p-3 border-b border-border">
+          <ImageTrackUploader />
+        </div>
+      )}
       <VideoEditorCanvas
         width={effectiveWidth}
         height={effectiveHeight}

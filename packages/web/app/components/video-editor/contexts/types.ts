@@ -18,7 +18,7 @@ export interface VideoEditorState {
 
 export interface VideoTrack {
   id: string;
-  type: 'video' | 'audio' | 'text';
+  type: 'video' | 'audio' | 'text' | 'image';
   name: string;
   startTime: number;
   endTime: number;
